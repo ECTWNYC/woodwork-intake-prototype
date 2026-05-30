@@ -22,7 +22,10 @@ The confirmation screen includes a unique intake ID, explicit review timeline (2
 ### 4. Inclusive identity capture
 Legal name is collected for prescriptions; preferred name and gender identity are optional, clearly labeled fields — signaling inclusion without gatekeeping.
 
-### 5. PMM rationale embedded
+### 5. Marketing-to-clinical trust bridge
+The landing intro screen creates a smoother transition from consumer marketing to clinical intake. Before users answer any sensitive questions, it establishes privacy expectations, surfaces the clinician review model, makes clear that treatment requires approval, and provides explicit next-step clarity. This reduces the cognitive gap between "I saw an ad" and "I am now a patient completing a medical intake."
+
+### 6. PMM rationale embedded
 A side panel on every step explains the strategic reasoning behind each design choice. On mobile it collapses under a "Design rationale" disclosure. This makes the prototype self-annotating for stakeholder reviews.
 
 ---

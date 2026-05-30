@@ -5,6 +5,7 @@ import ProgressBar from "./ProgressBar";
 import StepCard from "./StepCard";
 import OptionButton from "./OptionButton";
 import RationalePanel from "./RationalePanel";
+import LandingIntro from "./LandingIntro";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -1187,8 +1188,13 @@ function buildSteps(): StepConfig[] {
 // ---------------------------------------------------------------------------
 
 export default function IntakeFlow() {
+  const [showLanding, setShowLanding] = useState(true);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
+
+  if (showLanding) {
+    return <LandingIntro onStart={() => setShowLanding(false)} />;
+  }
 
   const steps = buildSteps();
   const current = steps[step];
@@ -1222,11 +1228,13 @@ export default function IntakeFlow() {
         <div className="mx-auto max-w-5xl">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-600 text-xs font-bold text-white">
-                W
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-700/80 text-white">
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
               </div>
               <span className="text-sm font-semibold text-zinc-300">
-                Health Intake
+                Health Intake Prototype
               </span>
             </div>
             <div className="flex-1 max-w-xs">
@@ -1282,7 +1290,7 @@ export default function IntakeFlow() {
                 {isLastStep && (
                   <button
                     type="button"
-                    onClick={() => { setStep(0); setAnswers({}); }}
+                    onClick={() => { setStep(0); setAnswers({}); setShowLanding(true); }}
                     className="flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900 px-6 py-2.5 text-sm font-medium text-zinc-300 transition-all hover:border-zinc-500 hover:text-zinc-100"
                   >
                     Start over
