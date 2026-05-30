@@ -116,7 +116,7 @@ export default function LandingIntro({ onStart }: LandingIntroProps) {
               Start private intake
             </button>
             <p className="text-xs text-zinc-500">
-              Takes about 5 minutes. Not everyone will be eligible.
+              Takes about 8–10 minutes. Some questions may be skipped based on your answers. Not everyone will be eligible.
             </p>
           </div>
 
