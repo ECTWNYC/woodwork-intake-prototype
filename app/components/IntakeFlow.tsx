@@ -6,6 +6,7 @@ import StepCard from "./StepCard";
 import OptionButton from "./OptionButton";
 import RationalePanel from "./RationalePanel";
 import LandingIntro from "./LandingIntro";
+import WaitlistFlow from "./WaitlistFlow";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -21,7 +22,7 @@ interface StepConfig {
     body: string;
     insight?: string;
   };
-  render: (answers: Answers, setAnswer: (key: string, value: string | string[]) => void) => React.ReactNode;
+  render: (answers: Answers, setAnswer: (key: string, value: string | string[]) => void, onJoinWaitlist?: () => void) => React.ReactNode;
   canContinue?: (answers: Answers) => boolean;
 }
 
@@ -369,11 +370,11 @@ function buildSteps(): StepConfig[] {
       title: "Where do you live?",
       tag: "State availability",
       rationale: {
-        headline: "State-gate early to protect the experience",
-        body: "Surfacing unavailability before users invest time filling out a long form is both honest and respectful. Users in unsupported states should be waitlisted and notified — not surprised at checkout.",
-        insight: "Users who discover geographic ineligibility at the end of a form have strongly negative sentiment. A step 3 gate converts that into a positive waitlist moment instead.",
+        headline: "Route unavailable-state users to demand capture, not clinical intake",
+        body: "Unavailable-state users should not answer sensitive clinical questions if care cannot be provided. Routing them to a waitlist avoids unnecessary sensitive data collection, reduces confusion, and creates a clean state-level demand signal.",
+        insight: "Note: state availability here is illustrative sample logic for prototype purposes. Actual availability would need to come from Woodwork's live eligibility rules, clinical operations, or legal/compliance source of truth.",
       },
-      render: (answers, setAnswer) => {
+      render: (answers, setAnswer, onJoinWaitlist) => {
         const state = (answers.state as string) || "";
         const isAvailable = AVAILABLE_STATES.includes(state);
         const isUnavailable = state !== "" && !isAvailable;
@@ -387,31 +388,49 @@ function buildSteps(): StepConfig[] {
               options={US_STATES.map((s) => ({ value: s, label: s }))}
               required
             />
+            <p className="text-xs leading-relaxed text-zinc-600">
+              For prototype purposes, state availability is illustrative. Actual availability would need to come from Woodwork's live eligibility rules, clinical operations, or legal/compliance source of truth.
+            </p>
             {isAvailable && (
               <div className="flex items-center gap-2 rounded-xl border border-teal-800 bg-teal-950/60 px-4 py-3">
                 <span className="text-lg">✅</span>
                 <p className="text-sm text-teal-300">
-                  Woodwork is available in {state}. You're good to continue.
+                  In this prototype, {state} is treated as an available state. You're good to continue.
                 </p>
               </div>
             )}
             {isUnavailable && (
-              <div className="flex flex-col gap-2 rounded-xl border border-amber-800 bg-amber-950/40 px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">🔜</span>
-                  <p className="text-sm font-semibold text-amber-300">
-                    Not yet available in {state}
+              <div className="flex flex-col gap-4 rounded-xl border border-amber-800 bg-amber-950/40 px-5 py-5">
+                <div>
+                  <p className="text-sm font-semibold text-amber-300 mb-1">
+                    Not available in {state} in this prototype
+                  </p>
+                  <p className="text-sm leading-relaxed text-amber-400/80">
+                    In this prototype, {state} is treated as an unavailable state. Join the waitlist to see how the demand capture flow works.
                   </p>
                 </div>
-                <p className="text-xs text-amber-500">
-                  We're expanding. Continue to join the waitlist — you'll be notified when we launch in your state.
-                </p>
+                <div className="flex flex-col gap-2">
+                  <button
+                    type="button"
+                    onClick={() => onJoinWaitlist?.()}
+                    className="w-full rounded-xl bg-teal-600 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-teal-500"
+                  >
+                    Join waitlist
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAnswer("state", "")}
+                    className="w-full rounded-xl border border-zinc-700 bg-zinc-900/60 px-5 py-2.5 text-sm font-medium text-zinc-400 transition-all hover:border-zinc-500 hover:text-zinc-200"
+                  >
+                    Choose a different state
+                  </button>
+                </div>
               </div>
             )}
           </div>
         );
       },
-      canContinue: (answers) => !!(answers.state as string),
+      canContinue: (answers) => AVAILABLE_STATES.includes(answers.state as string),
     },
 
     // -------------------------------------------------------------------------
@@ -1189,6 +1208,7 @@ function buildSteps(): StepConfig[] {
 
 export default function IntakeFlow() {
   const [showLanding, setShowLanding] = useState(true);
+  const [showWaitlist, setShowWaitlist] = useState(false);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
 
@@ -1202,6 +1222,15 @@ export default function IntakeFlow() {
 
   if (showLanding) {
     return <LandingIntro onStart={() => setShowLanding(false)} />;
+  }
+
+  if (showWaitlist) {
+    return (
+      <WaitlistFlow
+        selectedState={answers.state as string}
+        onChangeState={() => { setShowWaitlist(false); setStep(2); }}
+      />
+    );
   }
 
   const steps = buildSteps();
@@ -1255,7 +1284,7 @@ export default function IntakeFlow() {
                 tag={current.tag}
                 title={current.title}
               >
-                {current.render(answers, setAnswer)}
+                {current.render(answers, setAnswer, () => setShowWaitlist(true))}
               </StepCard>
 
               {/* Navigation */}
@@ -1291,7 +1320,7 @@ export default function IntakeFlow() {
                 {isLastStep && (
                   <button
                     type="button"
-                    onClick={() => { setStep(0); setAnswers({}); setShowLanding(true); }}
+                    onClick={() => { setStep(0); setAnswers({}); setShowWaitlist(false); setShowLanding(true); }}
                     className="flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900 px-6 py-2.5 text-sm font-medium text-zinc-300 transition-all hover:border-zinc-500 hover:text-zinc-100"
                   >
                     Start over

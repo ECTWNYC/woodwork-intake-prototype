@@ -35,7 +35,7 @@ A side panel on every step explains the strategic reasoning behind each design c
 | Design choice | PMM reasoning |
 |---|---|
 | Contact info at step 10, not step 1 | Users share more accurate contact details after clinical investment |
-| State gate at step 3 | Unavailability before heavy form investment → waitlist moment, not rage-quit |
+| State gate at step 3 | Unavailability before heavy form investment → waitlist moment, not rage-quit. **Note:** state availability is illustrative sample logic. Actual availability would need to come from Woodwork's live eligibility rules, clinical operations, or legal/compliance source of truth. |
 | Separate "How care works" step | Async telehealth requires more upfront model explanation than synchronous care |
 | Sermorelin named before eligibility questions | Informed consent foundation; reduces post-approval surprise |
 | Goals multi-select | Signals personalization; may give clinicians richer context; designed to support adherence |
