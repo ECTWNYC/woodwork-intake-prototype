@@ -184,7 +184,7 @@ function CheckRow({
   onChange,
 }: {
   id: string;
-  label: string;
+  label: React.ReactNode;
   checked: boolean;
   onChange: (v: boolean) => void;
 }) {
@@ -932,7 +932,7 @@ function buildSteps(): StepConfig[] {
       tag: "Consent",
       rationale: {
         headline: "Granular consent is designed to build trust and reflect genuine informed agreement",
-        body: "A single 'I agree to everything' checkbox is more anxiety-inducing than clearly labeled, specific consent items. Breaking consent into labeled components helps users understand exactly what they're agreeing to.",
+        body: "A single 'I agree to everything' checkbox is more anxiety-inducing than clearly labeled, specific consent items. Breaking consent into labeled components helps users understand exactly what they're agreeing to. Consent language should be accurate about how notices are delivered — 'opportunity to review' is more precise than 'receipt' when the notice is provided as a linked document rather than separately delivered.",
         insight: "The hypothesis is that granular, plain-language consent items reduce avoidable post-enrollment questions about what users agreed to — and signal good faith to regulators. Neither effect is guaranteed. This is not legal advice.",
       },
       render: (answers, setAnswer) => {
@@ -944,7 +944,19 @@ function buildSteps(): StepConfig[] {
           },
           {
             key: "hipaa",
-            label: "I acknowledge receipt of the Notice of Privacy Practices and consent to the use of my health information as described.",
+            label: (
+              <>
+                I acknowledge that I have had the opportunity to review the{" "}
+                <a
+                  href="#"
+                  onClick={(e) => e.stopPropagation()}
+                  className="underline underline-offset-2 text-teal-400 hover:text-teal-300"
+                >
+                  Notice of Privacy Practices
+                </a>{" "}
+                and consent to the use and disclosure of my health information as described.
+              </>
+            ),
           },
           {
             key: "rx",
@@ -952,7 +964,7 @@ function buildSteps(): StepConfig[] {
           },
           {
             key: "payment",
-            label: "I understand that payment is not collected until after clinical approval of my care plan.",
+            label: "I understand that my payment method may be collected before clinical approval, but payment will not be processed unless my care plan is approved.",
           },
           {
             key: "age",
@@ -1143,7 +1155,7 @@ function buildSteps(): StepConfig[] {
       tag: "Payment clarity",
       rationale: {
         headline: "Payment timing should be an explicit trust signal, not fine print",
-        body: "Burying payment timing in terms of service is a trust anti-pattern. Making it a dedicated screen communicates respect for the user's financial autonomy and eliminates post-approval payment surprises — a top driver of chargebacks and negative reviews.",
+        body: "Burying payment timing in terms of service is a trust anti-pattern. Making it a dedicated screen communicates respect for the user's financial autonomy and may reduce post-approval payment surprises. It is also important to distinguish clearly between collecting a payment method (which may happen before approval) and processing a payment (which should only happen after approval) — conflating the two is a common source of user confusion and disputes.",
         insight: "The hypothesis is that making 'you only pay after approval' an explicit, featured commitment — rather than burying it in terms of service — may improve conversion and reduce payment disputes. This is a testable claim, not an established benchmark.",
       },
       render: () => (
