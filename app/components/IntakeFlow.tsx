@@ -1192,6 +1192,14 @@ export default function IntakeFlow() {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
 
+  // Must be declared before any early return to satisfy the Rules of Hooks.
+  const setAnswer = useCallback(
+    (key: string, value: string | string[]) => {
+      setAnswers((prev) => ({ ...prev, [key]: value }));
+    },
+    []
+  );
+
   if (showLanding) {
     return <LandingIntro onStart={() => setShowLanding(false)} />;
   }
@@ -1199,13 +1207,6 @@ export default function IntakeFlow() {
   const steps = buildSteps();
   const current = steps[step];
   const totalSteps = steps.length;
-
-  const setAnswer = useCallback(
-    (key: string, value: string | string[]) => {
-      setAnswers((prev) => ({ ...prev, [key]: value }));
-    },
-    []
-  );
 
   const canContinue =
     !current.canContinue || current.canContinue(answers);
