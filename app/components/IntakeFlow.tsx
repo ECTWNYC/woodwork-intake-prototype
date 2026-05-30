@@ -567,7 +567,7 @@ function buildSteps(): StepConfig[] {
       rationale: {
         headline: "Collect biometric context before clinical history",
         body: "DOB, sex assigned at birth, height, and weight are foundational to dosing calculations. Capturing them here — before health history — mirrors how a clinical chart is structured and reduces cognitive load by grouping similar questions.",
-        insight: "Structured fields with clear labels are expected to produce fewer data-entry errors than free-text alternatives. Errors in DOB or weight directly delay clinical review — making input quality a clinical concern, not just a UX one.",
+        insight: "Structured fields with clear labels are expected to produce fewer data-entry errors than free-text alternatives. Errors in DOB or weight directly delay clinical review — making input quality a clinical concern, not just a UX one. Note: clinical safety attestations (e.g. pregnancy, contraindications) should be conditional based on sex assigned at birth, product line, and clinical/legal review — not shown universally.",
       },
       render: (answers, setAnswer) => {
         const attest = (answers.eligibilityAttest as string[]) || [];
@@ -682,9 +682,9 @@ function buildSteps(): StepConfig[] {
 
             <div className="flex flex-col gap-2">
               {[
-                { key: "adult", label: "I confirm I am 18 years of age or older" },
-                { key: "nopregnant", label: "I am not currently pregnant or nursing" },
-                { key: "nocontraindicate", label: "I have no known active cancer diagnosis" },
+                { key: "adult", label: "I am at least 18 years old." },
+                { key: "noclinicalguarantee", label: "I understand this intake does not guarantee treatment. A licensed clinician will determine whether treatment may be appropriate." },
+                { key: "accurate", label: "I confirm the information I provide is accurate and complete to the best of my knowledge." },
               ].map((item) => (
                 <CheckRow
                   key={item.key}
