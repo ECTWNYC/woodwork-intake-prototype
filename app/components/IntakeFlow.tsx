@@ -991,12 +991,12 @@ function buildSteps(): StepConfig[] {
 
     // ── 12. Medication contraindications ──────────────────────────────────
     {
-      title: "Current medications",
+      title: "Current medications and supplements",
       tag: "Contraindications",
       rationale: {
         headline: "Nitrate contraindications are the most critical drug interaction in ED care",
         body: "PDE5 inhibitors combined with nitrates or riociguat can cause life-threatening drops in blood pressure. This is an absolute contraindication. The intake must screen for this before any prescription is considered. Even occasional use counts.",
-        insight: "This is sample contraindication logic for prototype purposes. Actual contraindication screening would need to be defined and maintained by clinical and pharmacy teams.",
+        insight: "The structured list captures known high-risk ED-medication contraindication categories, while the \"other medication or supplement\" field gives clinicians a catch-all review path without automatically blocking the user. Actual contraindication screening would need to be defined and maintained by clinical and pharmacy teams.",
       },
       isHardStop: (answers) => {
         const sel = (answers.medicationContraindications as string[]) || [];
@@ -1013,11 +1013,12 @@ function buildSteps(): StepConfig[] {
           { value: "riociguat", label: "Adempas / riociguat, used to treat pulmonary hypertension" },
           { value: "alpha_blocker", label: "Any alpha blocker" },
           { value: "isosorbide", label: "Isosorbide mononitrate or isosorbide dinitrate" },
+          { value: "other_med_supplement", label: "Another medication or supplement not listed here" },
         ];
         return (
           <div className="flex flex-col gap-4">
-            <QuestionLabel>Do you use any of the following?</QuestionLabel>
-            <p className="text-xs text-zinc-500">Please select any medication or supplement that you use, even if it is occasional use.</p>
+            <QuestionLabel>Do you use any of the following medications or supplements?</QuestionLabel>
+            <p className="text-xs text-zinc-500">Select anything you use, even occasionally. This helps identify potential safety concerns with ED medications.</p>
             <div className="flex flex-col gap-2">
               {opts.map((o) => (
                 <OptionButton key={o.value} label={o.label}
@@ -1025,6 +1026,21 @@ function buildSteps(): StepConfig[] {
                   onClick={() => setAnswer("medicationContraindications", toggleExclusive(selected, o.value))} />
               ))}
             </div>
+            {selected.includes("other_med_supplement") && (
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="otherMedSupplementDetails" className="text-sm font-medium text-zinc-300">
+                  Please list the medication or supplement, dose if known, and how often you use it. <span className="text-xs font-normal text-zinc-500">(optional)</span>
+                </label>
+                <textarea
+                  id="otherMedSupplementDetails"
+                  value={(answers.otherMedSupplementDetails as string) || ""}
+                  onChange={(e) => setAnswer("otherMedSupplementDetails", e.target.value)}
+                  rows={3}
+                  placeholder="e.g. Ashwagandha, 600 mg, daily"
+                  className="rounded-lg border border-zinc-700 bg-zinc-900 px-3.5 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500 resize-none"
+                />
+              </div>
+            )}
           </div>
         );
       },
@@ -1038,7 +1054,7 @@ function buildSteps(): StepConfig[] {
       rationale: {
         headline: "Poppers are a direct contraindication to ED medications in MSM populations",
         body: "Amyl nitrate (poppers) is used recreationally by a significant portion of MSM users — and creates the same dangerous hypotensive interaction as pharmaceutical nitrates. Asking about this without stigma is clinically necessary and signals cultural competency. This is a medication safety question, not a moral judgment.",
-        insight: "Failing to screen for poppers use in a gay-first platform is not a neutral omission — it is a clinical gap that puts users at risk. This is sample screening logic for prototype purposes.",
+        insight: "The structured list captures known high-risk or clinically relevant substance categories, while the catch-all field gives clinicians a review path without automatically blocking the user. Failing to screen for poppers use in a gay-first platform is not a neutral omission — it is a clinical gap that puts users at risk.",
       },
       isHardStop: (answers) => {
         const sel = (answers.recreationalDrugs as string[]) || [];
@@ -1052,7 +1068,7 @@ function buildSteps(): StepConfig[] {
           { value: "poppers", label: "Poppers or Rush, including amyl nitrate or butyl nitrate" },
           { value: "cocaine", label: "Cocaine" },
           { value: "mdma", label: "Molly, MDMA, or ecstasy" },
-          { value: "other_drug", label: "Other drug, prescription medication not prescribed by a clinician, or prescription medicine not used in the way it was written by a clinician" },
+          { value: "other_drug", label: "Another recreational drug, non-prescribed medication, or medication used differently than prescribed" },
         ];
         return (
           <div className="flex flex-col gap-4">
@@ -1065,6 +1081,21 @@ function buildSteps(): StepConfig[] {
                   onClick={() => setAnswer("recreationalDrugs", toggleExclusive(selected, o.value))} />
               ))}
             </div>
+            {selected.includes("other_drug") && (
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="otherDrugDetails" className="text-sm font-medium text-zinc-300">
+                  Please list what you used, how recently, and how often. <span className="text-xs font-normal text-zinc-500">(optional)</span>
+                </label>
+                <textarea
+                  id="otherDrugDetails"
+                  value={(answers.otherDrugDetails as string) || ""}
+                  onChange={(e) => setAnswer("otherDrugDetails", e.target.value)}
+                  rows={3}
+                  placeholder="e.g. Cannabis, last week, a few times a week"
+                  className="rounded-lg border border-zinc-700 bg-zinc-900 px-3.5 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500 resize-none"
+                />
+              </div>
+            )}
           </div>
         );
       },
@@ -1378,7 +1409,9 @@ function buildSteps(): StepConfig[] {
           { label: "CV symptoms", value: displayMulti("cvSymptoms") || "Not applicable" },
           { label: "Penile health", value: displayMulti("penileHealth") },
           { label: "Medication contraindications", value: displayMulti("medicationContraindications") },
+          ...(((answers.medicationContraindications as string[]) || []).includes("other_med_supplement") ? [{ label: "Other medication details", value: (answers.otherMedSupplementDetails as string)?.trim() || "Not provided" }] : []),
           { label: "Recreational drug use", value: displayMulti("recreationalDrugs") },
+          ...(((answers.recreationalDrugs as string[]) || []).includes("other_drug") ? [{ label: "Other drug details", value: (answers.otherDrugDetails as string)?.trim() || "Not provided" }] : []),
           { label: "Other medical history", value: displayMulti("otherMedHistory") },
           { label: "HIV status", value: answers.hivStatus === "yes" ? "Yes" : answers.hivStatus === "no" ? "No" : "—" },
           { label: "HIV medications", value: displayMulti("hivMeds") || "Not applicable" },
