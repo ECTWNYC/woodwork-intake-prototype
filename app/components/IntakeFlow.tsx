@@ -1446,24 +1446,37 @@ function buildSteps(): StepConfig[] {
       title: "Intake submitted",
       tag: "Confirmation",
       rationale: {
-        headline: "Post-submit confidence is a product moment, not an afterthought",
-        body: "The confirmation screen is the last memory users have of the intake experience. A clear intake ID, explicit status, realistic timeline, and concrete next steps leave users feeling confident — not wondering 'did that work?'",
-        insight: "Health app NPS scores are disproportionately driven by the post-submit moment. A polished confirmation screen with a unique ID and timeline has the same trust impact as a full rebrand.",
+        headline: "Post-submit trust depends on status clarity and accessible support",
+        body: "The confirmation screen is the last memory users have of the intake experience. A clear intake ID, explicit status, realistic timeline, and visible support paths leave users feeling confident — not wondering 'did that work?' or 'who do I contact if something goes wrong?'",
+        insight: "Health app NPS scores are disproportionately driven by the post-submit moment. Showing support topic shortcuts alongside the intake ID closes the most common abandonment loop: users who don't know how to follow up stop trusting the product.",
       },
       render: (answers) => {
         const intakeId = `WW-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
         const displayName = (answers.preferredFirstName as string)?.trim() || (answers.legalFirstName as string)?.trim() || "";
+        const supportTopics = [
+          { icon: "📋", label: "Intake or account issue" },
+          { icon: "💳", label: "Payment or refund question" },
+          { icon: "💊", label: "Prescription or pharmacy status" },
+          { icon: "🚚", label: "Shipping or refill issue" },
+        ];
         return (
           <div className="flex flex-col gap-6">
+            {/* Status hero */}
             <div className="flex flex-col items-center gap-3 rounded-2xl border border-teal-800 bg-teal-950/40 px-6 py-8 text-center">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-teal-900/60 text-3xl">✅</div>
               <h3 className="text-xl font-semibold text-teal-100">{displayName ? `You're all set, ${displayName}` : "You're all set"}</h3>
+              <div className="flex items-center gap-2 rounded-full border border-teal-700/50 bg-teal-900/40 px-3 py-1">
+                <span className="h-2 w-2 rounded-full bg-teal-400" />
+                <span className="text-xs font-medium text-teal-300">Pending clinician review</span>
+              </div>
               <p className="text-sm text-teal-300/80">Your intake has been submitted and is pending clinical review.</p>
               <div className="rounded-lg border border-teal-700/60 bg-teal-900/40 px-4 py-2">
                 <p className="text-xs font-medium text-teal-500 uppercase tracking-widest">Intake ID</p>
                 <p className="text-lg font-mono font-bold text-teal-200">{intakeId}</p>
               </div>
             </div>
+
+            {/* Next steps timeline */}
             <div className="grid gap-3">
               {[
                 { icon: "📧", title: "Confirmation sent", body: "A confirmation has been sent to the contact associated with your account." },
@@ -1479,6 +1492,26 @@ function buildSteps(): StepConfig[] {
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* Support shortcuts */}
+            <div className="flex flex-col gap-3">
+              <SectionDivider label="Support" />
+              <p className="text-sm text-zinc-400">
+                Use your intake ID <span className="font-mono font-semibold text-zinc-200">{intakeId}</span> when contacting support so the care team can locate your submission.
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {supportTopics.map((t) => (
+                  <div key={t.label}
+                    className="flex items-start gap-2.5 rounded-xl border border-zinc-700 bg-zinc-900 px-3.5 py-3">
+                    <span className="text-base leading-none mt-0.5 shrink-0">{t.icon}</span>
+                    <span className="text-xs font-medium text-zinc-300 leading-snug">{t.label}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-zinc-600 leading-relaxed">
+                Support topics are shown for prototype illustration only. In production, each would route to the appropriate care team or support contact path.
+              </p>
             </div>
           </div>
         );
@@ -1526,6 +1559,16 @@ function buildSteps(): StepConfig[] {
           <InfoBlock>
             <p className="text-xs text-zinc-500 leading-relaxed">
               Pricing varies by care plan. Your clinician will outline costs in your care plan before any charge is made. You'll have an opportunity to review and accept before payment is processed.
+            </p>
+          </InfoBlock>
+          <InfoBlock>
+            <p className="text-xs text-zinc-500 leading-relaxed">
+              <span className="font-semibold text-zinc-400">Refunds:</span> If treatment is not approved, your payment status and refund eligibility should be clearly shown before any medication is ordered. Final refund handling depends on Woodwork&apos;s billing and fulfillment policy.
+            </p>
+          </InfoBlock>
+          <InfoBlock>
+            <p className="text-xs text-zinc-500 leading-relaxed">
+              <span className="font-semibold text-zinc-400">After approval:</span> This status page should show prescription fulfillment, shipping, and refill updates once a care plan is active.
             </p>
           </InfoBlock>
         </div>
