@@ -385,7 +385,45 @@ function buildSteps(): StepConfig[] {
       canContinue: (answers) => AVAILABLE_STATES.includes(answers.state as string),
     },
 
-    // ── 2. ED symptom pattern ─────────────────────────────────────────────
+    // ── 2. ED motivation ─────────────────────────────────────────────────
+    {
+      title: "Your treatment goal",
+      tag: "Motivation",
+      rationale: {
+        headline: "Motivation framing increases engagement and personalizes the care path",
+        body: "Understanding why a user is seeking treatment now — not just what symptoms they have — helps the clinician frame the care plan in language that resonates. Users who feel understood are more likely to adhere to treatment.",
+        insight: "Asking about motivation also surfaces the emotional context behind ED: performance anxiety, relationship dynamics, spontaneity. These are real factors in treatment satisfaction that clinical questions alone don't capture.",
+      },
+      render: (answers, setAnswer) => {
+        const opts = [
+          { value: "spontaneous", label: "I want to have more spontaneous sex" },
+          { value: "harder_longer", label: "I want to stay harder for longer" },
+          { value: "stress_free", label: "I want sex to feel easy and stress-free" },
+          { value: "all_above", label: "All of the above" },
+        ];
+        return (
+          <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-3">
+              <QuestionLabel>What is the main reason you're looking for treatment now?</QuestionLabel>
+              <div className="flex flex-col gap-2">
+                {opts.map((o) => (
+                  <OptionButton key={o.value} label={o.label}
+                    selected={answers.edMotivation === o.value}
+                    onClick={() => setAnswer("edMotivation", o.value)} />
+                ))}
+              </div>
+            </div>
+            <div className="rounded-xl border border-teal-800 bg-teal-950/40 px-5 py-4">
+              <p className="text-sm font-semibold text-teal-200 mb-1.5">Most ED treatment is built for straight men, not us.</p>
+              <p className="text-sm leading-relaxed text-teal-300/80">With Woodwork, users get access to board-certified and culturally trained clinicians who understand LGBTQ+ health needs.</p>
+            </div>
+          </div>
+        );
+      },
+      canContinue: (answers) => !!answers.edMotivation,
+    },
+
+    // ── 3. ED symptom pattern ─────────────────────────────────────────────
     {
       title: "ED symptom pattern",
       tag: "Symptoms",
@@ -1106,7 +1144,61 @@ function buildSteps(): StepConfig[] {
       },
     },
 
-    // ── 14. Required consent ──────────────────────────────────────────────
+    // ── 16. Profile & contact ─────────────────────────────────────────────
+    {
+      title: "Profile & contact",
+      tag: "Your profile",
+      rationale: {
+        headline: "Contact information enables clinical communication and care coordination",
+        body: "Legal name, preferred name, and contact details are required for prescription issuance, shipping, and clinician follow-up. Preferred name allows the care team to communicate respectfully — an important inclusion signal for LGBTQ+ users.",
+        insight: "Asking for preferred name alongside legal name is a common LGBTQ+ health inclusion practice. It allows clinicians and pharmacies to use the name a user actually goes by, while preserving legal name for prescription and billing requirements.",
+      },
+      render: (answers, setAnswer) => {
+        const genderOpts = [
+          { value: "man", label: "Man" },
+          { value: "woman", label: "Woman" },
+          { value: "nonbinary", label: "Non-binary" },
+          { value: "trans_man", label: "Transgender man" },
+          { value: "trans_woman", label: "Transgender woman" },
+          { value: "genderqueer", label: "Genderqueer / gender fluid" },
+          { value: "not_listed", label: "An identity not listed here" },
+          { value: "prefer_not", label: "Prefer not to say" },
+        ];
+        return (
+          <div className="flex flex-col gap-5">
+            <InputField label="Legal name" id="legalName" placeholder="As it appears on your ID"
+              value={(answers.legalName as string) || ""}
+              onChange={(v) => setAnswer("legalName", v)} required />
+            <InputField label="Preferred name" id="preferredName" placeholder="What should we call you?"
+              value={(answers.preferredName as string) || ""}
+              onChange={(v) => setAnswer("preferredName", v)} />
+            <InputField label="Email" id="profileEmail" type="email" placeholder="you@example.com"
+              value={(answers.profileEmail as string) || ""}
+              onChange={(v) => setAnswer("profileEmail", v)} required />
+            <InputField label="Phone" id="profilePhone" type="tel" placeholder="(555) 000-0000"
+              value={(answers.profilePhone as string) || ""}
+              onChange={(v) => setAnswer("profilePhone", v)} required />
+            <div className="flex flex-col gap-2">
+              <span className="text-sm font-medium text-zinc-300">Gender identity <span className="text-xs font-normal text-zinc-500">(optional)</span></span>
+              <div className="flex flex-col gap-2">
+                {genderOpts.map((o) => (
+                  <OptionButton key={o.value} label={o.label}
+                    selected={answers.genderIdentity === o.value}
+                    onClick={() => setAnswer("genderIdentity", o.value)} />
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      },
+      canContinue: (answers) => !!(
+        (answers.legalName as string)?.trim() &&
+        (answers.profileEmail as string)?.trim() &&
+        (answers.profilePhone as string)?.trim()
+      ),
+    },
+
+    // ── 17. Required consent ──────────────────────────────────────────────
     {
       title: "Required consent",
       tag: "Consent",
@@ -1208,7 +1300,20 @@ function buildSteps(): StepConfig[] {
           return vals.join(", ");
         }
 
+        const genderLabels: Record<string, string> = {
+          man: "Man", woman: "Woman", nonbinary: "Non-binary",
+          trans_man: "Transgender man", trans_woman: "Transgender woman",
+          genderqueer: "Genderqueer / gender fluid", not_listed: "An identity not listed here",
+          prefer_not: "Prefer not to say",
+        };
+
         const rows: { label: string; value: string }[] = [
+          { label: "Legal name", value: (answers.legalName as string) || "—" },
+          { label: "Preferred name", value: (answers.preferredName as string) || "—" },
+          { label: "Email", value: (answers.profileEmail as string) || "—" },
+          { label: "Phone", value: (answers.profilePhone as string) || "—" },
+          { label: "Gender identity", value: answers.genderIdentity ? (genderLabels[answers.genderIdentity as string] || "—") : "—" },
+          { label: "Marketing consent", value: answers.marketingConsent === "yes" ? "Opted in" : "Not opted in" },
           { label: "State", value: (answers.state as string) || "—" },
           { label: "Date of birth", value: answers.dob_month ? `${answers.dob_month}/${answers.dob_day}/${answers.dob_year}` : "—" },
           { label: "Sex assigned at birth", value: (answers.sex as string) || "—" },
@@ -1398,11 +1503,11 @@ export default function IntakeFlow() {
 
   const canContinue = !current.canContinue || current.canContinue(answers);
   const isLastStep = step === allSteps.length - 1;
-  const isReviewStep = step === 16; // index 16 = "Review intake" — submit happens here
+  const isReviewStep = step === 18; // index 18 = "Review intake" — submit happens here
 
   function handleContinue() {
     if (current.isHardStop?.(answers)) {
-      const reason: HardStopReason = step === 12 ? "medication" : step === 13 ? "drug" : "safety";
+      const reason: HardStopReason = step === 13 ? "medication" : step === 14 ? "drug" : "safety";
       setHardStopReason(reason);
       setShowHardStop(true);
       return;
