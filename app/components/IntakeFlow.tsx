@@ -392,14 +392,18 @@ function buildSteps(): StepConfig[] {
       rationale: {
         headline: "Motivation framing increases engagement and personalizes the care path",
         body: "Understanding why a user is seeking treatment now — not just what symptoms they have — helps the clinician frame the care plan in language that resonates. Users who feel understood are more likely to adhere to treatment.",
-        insight: "Asking about motivation also surfaces the emotional context behind ED: performance anxiety, relationship dynamics, spontaneity. These are real factors in treatment satisfaction that clinical questions alone don't capture.",
+        insight: "\"A mix of these reasons\" is clearer than \"All of the above\" in a single-select flow — it acknowledges that motivations overlap without implying the user must endorse every specific option. \"Something else\" gives users a way to express nuance without adding friction.",
       },
       render: (answers, setAnswer) => {
         const opts = [
-          { value: "spontaneous", label: "I want to have more spontaneous sex" },
+          { value: "trouble_getting", label: "I'm having trouble getting or keeping an erection" },
           { value: "harder_longer", label: "I want to stay harder for longer" },
-          { value: "stress_free", label: "I want sex to feel easy and stress-free" },
-          { value: "all_above", label: "All of the above" },
+          { value: "spontaneous", label: "I want to have more spontaneous sex" },
+          { value: "easier_less_stress", label: "I want sex to feel easier and less stressful" },
+          { value: "more_confident", label: "I want to feel more confident during sex" },
+          { value: "easier_access", label: "I've used ED medication before and want an easier way to access it" },
+          { value: "mix_of_reasons", label: "A mix of these reasons" },
+          { value: "something_else", label: "Something else" },
         ];
         return (
           <div className="flex flex-col gap-5">
@@ -412,6 +416,21 @@ function buildSteps(): StepConfig[] {
                     onClick={() => setAnswer("edMotivation", o.value)} />
                 ))}
               </div>
+              {answers.edMotivation === "something_else" && (
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="edMotivationOther" className="text-sm font-medium text-zinc-300">
+                    Tell us what brought you here. <span className="text-xs font-normal text-zinc-500">(optional)</span>
+                  </label>
+                  <input
+                    id="edMotivationOther"
+                    type="text"
+                    value={(answers.edMotivationOther as string) || ""}
+                    onChange={(e) => setAnswer("edMotivationOther", e.target.value)}
+                    placeholder="Example: I want to feel more prepared before dating again."
+                    className="rounded-lg border border-zinc-700 bg-zinc-900 px-3.5 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 transition-colors focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                  />
+                </div>
+              )}
             </div>
             <div className="rounded-xl border border-teal-800 bg-teal-950/40 px-5 py-4">
               <p className="text-sm font-semibold text-teal-200 mb-1.5">Most ED treatment is built for straight men, not us.</p>
@@ -1291,6 +1310,16 @@ function buildSteps(): StepConfig[] {
         insight: "A pre-submission review screen may reduce avoidable intake amendment support tickets by giving users a chance to review information before submission. Whether this improves NPS at the confirmation step is worth measuring post-launch.",
       },
       render: (answers) => {
+        const motivationLabels: Record<string, string> = {
+          trouble_getting: "I'm having trouble getting or keeping an erection",
+          harder_longer: "I want to stay harder for longer",
+          spontaneous: "I want to have more spontaneous sex",
+          easier_less_stress: "I want sex to feel easier and less stressful",
+          more_confident: "I want to feel more confident during sex",
+          easier_access: "I've used ED medication before and want an easier way to access it",
+          mix_of_reasons: "A mix of these reasons",
+          something_else: "Something else",
+        };
         const edFreqLabels: Record<string, string> = {
           every_time: "Every time", more_than_half: "More than half of the time",
           occasionally: "Occasionally", rarely: "Rarely", never: "Never",
@@ -1334,6 +1363,8 @@ function buildSteps(): StepConfig[] {
           { label: "Sex assigned at birth", value: (answers.sex as string) || "—" },
           { label: "Height", value: answers.height_ft ? `${answers.height_ft}' ${answers.height_in || 0}"` : "—" },
           { label: "Weight", value: answers.weight ? `${answers.weight} lbs` : "—" },
+          { label: "Treatment goal", value: motivationLabels[answers.edMotivation as string] || "—" },
+          ...(answers.edMotivation === "something_else" ? [{ label: "Treatment goal details", value: (answers.edMotivationOther as string)?.trim() || "Something else" }] : []),
           { label: "ED frequency", value: edFreqLabels[answers.edFrequency as string] || "—" },
           { label: "Masturbation erection", value: mastLabels[answers.masturbationErection as string] || "—" },
           { label: "Morning wood", value: morningLabels[answers.morningWood as string] || "—" },
