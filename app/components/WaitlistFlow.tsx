@@ -131,7 +131,8 @@ export default function WaitlistFlow({
                   </select>
                 </div>
 
-                {/* Consent */}
+                {/* Optional marketing consent */}
+                <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Optional marketing consent</p>
                 <label
                   htmlFor="wl-consent"
                   className={[
@@ -163,7 +164,7 @@ export default function WaitlistFlow({
                     )}
                   </span>
                   <span className={["text-sm leading-snug", consented ? "text-teal-100" : "text-zinc-300"].join(" ")}>
-                    I agree to receive updates about Woodwork availability in my state.
+                    I agree to receive optional marketing communications from Grindr LLC, including communications about Woodwork and related Grindr products or services, by email or text. Consent is not required to use Woodwork or any other Grindr product or service. Message and data rates may apply. Reply STOP to opt out of texts.
                   </span>
                 </label>
 

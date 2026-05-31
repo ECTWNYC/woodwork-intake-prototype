@@ -336,7 +336,7 @@ function buildSteps(): StepConfig[] {
       tag: "State availability",
       rationale: {
         headline: "Route unavailable-state users to demand capture, not clinical intake",
-        body: "Unavailable-state users should not answer sensitive clinical questions if care cannot be provided. Routing them to a waitlist avoids unnecessary sensitive data collection, reduces confusion, and creates a clean state-level demand signal.",
+        body: "Unavailable-state users should not answer sensitive clinical questions if care cannot be provided. Routing them to a waitlist avoids unnecessary sensitive data collection, reduces confusion, and creates a clean state-level demand signal. State availability copy should confirm whether the user can proceed — not introduce care-model concepts. At this step, users need a clear yes or no on availability, nothing more.",
         insight: "Note: state availability here is illustrative sample logic for prototype purposes. Actual availability would need to come from Woodwork's live eligibility rules, clinical operations, or legal/compliance source of truth.",
       },
       render: (answers, setAnswer, onJoinWaitlist) => {
@@ -356,7 +356,7 @@ function buildSteps(): StepConfig[] {
             {isAvailable && (
               <div className="flex items-center gap-2 rounded-xl border border-teal-800 bg-teal-950/60 px-4 py-3">
                 <span className="text-lg">✅</span>
-                <p className="text-sm text-teal-300">In this prototype, {state} is treated as an available state. You're good to continue.</p>
+                <p className="text-sm text-teal-300">In this prototype, {state} is treated as an available state. You can continue to the online intake.</p>
               </div>
             )}
             {isUnavailable && (
@@ -364,7 +364,7 @@ function buildSteps(): StepConfig[] {
                 <div>
                   <p className="text-sm font-semibold text-amber-300 mb-1">Not available in {state} in this prototype</p>
                   <p className="text-sm leading-relaxed text-amber-400/80">
-                    In this prototype, {state} is treated as an unavailable state. Join the waitlist to see how the demand capture flow works.
+                    In this prototype, {state} is treated as an unavailable state. Instead of asking clinical questions, this prototype routes users to a waitlist path.
                   </p>
                 </div>
                 <div className="flex flex-col gap-2">
@@ -861,7 +861,78 @@ function buildSteps(): StepConfig[] {
       canContinue: (answers) => ((answers.penileHealth as string[]) || []).length > 0,
     },
 
-    // ── 11. Medication contraindications ──────────────────────────────────
+    // ── 11. ED medication allergy screening ───────────────────────────────
+    {
+      title: "Medication allergies",
+      tag: "Allergy screening",
+      rationale: {
+        headline: "ED medication allergy screening is a clinical prerequisite before prescribing",
+        body: "Known allergies to PDE5 inhibitors (sildenafil, tadalafil, vardenafil, avanafil) are a contraindication to prescribing those medications. Asking about other allergies also captures relevant clinical context — dye or ingredient allergies can affect compounded formulations.",
+        insight: "This is sample allergy-screening logic for prototype purposes. A 'Yes' to a known ED medication allergy routes to the ineligible screen in this prototype. Actual eligibility routing for allergies would require clinical, legal, and compliance validation.",
+      },
+      isHardStop: (answers) => answers.edMedAllergy === "yes",
+      render: (answers, setAnswer) => (
+        <div className="flex flex-col gap-7">
+          <div className="flex flex-col gap-3">
+            <QuestionLabel>
+              Do you have a known medication allergy to Viagra/sildenafil, Cialis/tadalafil, Levitra/vardenafil, or Stendra/avanafil?
+            </QuestionLabel>
+            <div className="flex flex-col gap-2">
+              {[
+                { value: "no", label: "No" },
+                { value: "yes", label: "Yes" },
+                { value: "not_sure", label: "Not sure" },
+              ].map((o) => (
+                <OptionButton key={o.value} label={o.label}
+                  selected={answers.edMedAllergy === o.value}
+                  onClick={() => setAnswer("edMedAllergy", o.value)} />
+              ))}
+            </div>
+            <p className="text-xs text-zinc-600">
+              Selecting "Yes" routes to a sample ineligible screen in this prototype. Actual eligibility routing for allergies requires clinical, legal, and compliance review.
+            </p>
+          </div>
+          <div className="flex flex-col gap-3">
+            <QuestionLabel>
+              Do you have any other allergies, such as medications, foods, dyes, or ingredients?
+            </QuestionLabel>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { value: "no", label: "No" },
+                { value: "yes", label: "Yes" },
+              ].map((o) => (
+                <OptionButton key={o.value} label={o.label}
+                  selected={answers.otherAllergy === o.value}
+                  onClick={() => setAnswer("otherAllergy", o.value)} />
+              ))}
+            </div>
+            {answers.otherAllergy === "yes" && (
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="other-allergy-details" className="text-sm font-medium text-zinc-300">
+                  Please provide details, including the allergy and your reaction. <span className="text-teal-400">*</span>
+                </label>
+                <textarea
+                  id="other-allergy-details"
+                  value={(answers.otherAllergyDetails as string) || ""}
+                  onChange={(e) => setAnswer("otherAllergyDetails", e.target.value)}
+                  rows={3}
+                  placeholder="e.g. Penicillin — hives and difficulty breathing"
+                  className="rounded-lg border border-zinc-700 bg-zinc-900 px-3.5 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500 resize-none"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      ),
+      canContinue: (answers) => {
+        if (!answers.edMedAllergy) return false;
+        if (!answers.otherAllergy) return false;
+        if (answers.otherAllergy === "yes" && !(answers.otherAllergyDetails as string)?.trim()) return false;
+        return true;
+      },
+    },
+
+    // ── 12. Medication contraindications ──────────────────────────────────
     {
       title: "Current medications",
       tag: "Contraindications",
@@ -1042,7 +1113,7 @@ function buildSteps(): StepConfig[] {
       rationale: {
         headline: "Granular consent is designed to build trust and reflect genuine informed agreement",
         body: "A single 'I agree to everything' checkbox is more anxiety-inducing than clearly labeled, specific consent items. Breaking consent into labeled components helps users understand exactly what they're agreeing to. Consent language should be accurate about how notices are delivered — 'opportunity to review' is more precise than 'receipt' when the notice is provided as a linked document rather than separately delivered.",
-        insight: "The hypothesis is that granular, plain-language consent items reduce avoidable post-enrollment questions about what users agreed to — and signal good faith to regulators. Neither effect is guaranteed. This is not legal advice.",
+        insight: "The hypothesis is that granular, plain-language consent items reduce avoidable post-enrollment questions about what users agreed to — and signal good faith to regulators. Keeping optional marketing consent (Grindr LLC) separate from required care consents preserves trust in a sensitive health context: users should never feel that marketing opt-in is a condition of receiving care.",
       },
       render: (answers, setAnswer) => {
         const consented = (answers.consent as string[]) || [];
@@ -1087,6 +1158,16 @@ function buildSteps(): StepConfig[] {
                   setAnswer("consent", checked ? [...consented, item.key] : consented.filter((v) => v !== item.key))
                 } />
             ))}
+            <SectionDivider label="Optional marketing consent" />
+            <CheckRow
+              id="consent_marketing"
+              label="I agree to receive optional marketing communications from Grindr LLC, including communications about Woodwork and related Grindr products or services, by email or text. Consent is not required to use Woodwork or any other Grindr product or service. Message and data rates may apply. Reply STOP to opt out of texts."
+              checked={answers.marketingConsent === "yes"}
+              onChange={(checked) => setAnswer("marketingConsent", checked ? "yes" : "")}
+            />
+            <p className="text-xs leading-relaxed text-zinc-600">
+              Care-related communications — including intake confirmation, clinician review status, and prescription updates — are sent regardless of this selection and are separate from marketing communications.
+            </p>
           </div>
         );
       },
@@ -1317,11 +1398,11 @@ export default function IntakeFlow() {
 
   const canContinue = !current.canContinue || current.canContinue(answers);
   const isLastStep = step === allSteps.length - 1;
-  const isReviewStep = step === 15; // index 15 = "Review intake" — submit happens here
+  const isReviewStep = step === 16; // index 16 = "Review intake" — submit happens here
 
   function handleContinue() {
     if (current.isHardStop?.(answers)) {
-      const reason: HardStopReason = step === 11 ? "medication" : step === 12 ? "drug" : "safety";
+      const reason: HardStopReason = step === 12 ? "medication" : step === 13 ? "drug" : "safety";
       setHardStopReason(reason);
       setShowHardStop(true);
       return;

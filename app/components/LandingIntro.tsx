@@ -136,7 +136,7 @@ export default function LandingIntro({ onStart }: LandingIntroProps) {
               />
             </svg>
             <p className="text-xs leading-relaxed text-zinc-500">
-              Your health information is used for care review and is not used to update your Grindr profile.
+              Your health information is used for care review and treatment operations. It is not used to update your Grindr profile.
             </p>
           </div>
 

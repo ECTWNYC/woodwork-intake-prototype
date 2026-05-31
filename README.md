@@ -1,6 +1,8 @@
 # Woodwork Intake — Outside-In Prototype
 
-An interactive, polished prototype of a redesigned ED (erectile dysfunction) health intake flow. Built as a product marketing (PMM) artifact to demonstrate how a regulated consumer health intake could improve trust, completion quality, safety screening, and post-submit confidence through intentional UX design.
+An interactive, polished prototype of a redesigned ED (erectile dysfunction) health intake flow for Woodwork, a Grindr health brand. Built as a product marketing (PMM) artifact to demonstrate how a regulated consumer health intake could improve trust, completion quality, safety screening, and post-submit confidence through intentional UX design.
+
+The prototype treats Woodwork as a Grindr health brand while keeping care-related communications, optional marketing communications, and app-plan benefits structurally separate within the intake — to preserve trust in a sensitive health flow.
 
 > **Disclaimer:** Outside-in prototype. Not affiliated with Woodwork or Grindr. Not clinical, legal, or compliance advice.
 
@@ -24,6 +26,8 @@ The confirmation screen includes a unique intake ID, explicit review timeline (2
 
 ### 5. Marketing-to-clinical trust bridge
 The landing intro screen creates a smoother transition from consumer marketing to clinical intake. Before users answer any sensitive questions, it establishes privacy expectations, surfaces the clinician review model, makes clear that treatment requires approval, and provides explicit next-step clarity. This reduces the cognitive gap between "I saw an ad" and "I am now a patient completing a medical intake."
+
+App-plan perks such as Grindr Unlimited are intentionally excluded from the pre-intake entry point. The opening screen should prioritize clinical trust, privacy, eligibility, and next-step clarity — not upsell. If plan benefits are surfaced at all, they belong in the payment or plan context, not the intake CTA.
 
 ### 6. PMM rationale embedded
 A side panel on every step explains the strategic reasoning behind each design choice. On mobile it collapses under a "Design rationale" disclosure. This makes the prototype self-annotating for stakeholder reviews.
