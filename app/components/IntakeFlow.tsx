@@ -1200,7 +1200,7 @@ function buildSteps(): StepConfig[] {
       tag: "Your profile",
       rationale: {
         headline: "Contact information enables clinical communication and care coordination",
-        body: "Legal name, preferred name, and contact details are required for prescription issuance, shipping, and clinician follow-up. Preferred name allows the care team to communicate respectfully — an important inclusion signal for LGBTQ+ users.",
+        body: "Legal first and last name support clinical review, pharmacy fulfillment, payment, and account matching. Preferred first name supports respectful communication without collecting unnecessary extra identity data.",
         insight: "Asking for preferred name alongside legal name is a common LGBTQ+ health inclusion practice. It allows clinicians and pharmacies to use the name a user actually goes by, while preserving legal name for prescription and billing requirements.",
       },
       render: (answers, setAnswer) => {
@@ -1216,12 +1216,16 @@ function buildSteps(): StepConfig[] {
         ];
         return (
           <div className="flex flex-col gap-5">
-            <InputField label="Legal name" id="legalName" placeholder="As it appears on your ID"
-              value={(answers.legalName as string) || ""}
-              onChange={(v) => setAnswer("legalName", v)} required />
-            <InputField label="Preferred name" id="preferredName" placeholder="What should we call you?"
-              value={(answers.preferredName as string) || ""}
-              onChange={(v) => setAnswer("preferredName", v)} />
+            <InputField label="Legal first name" id="legalFirstName" placeholder="As it appears on your ID"
+              value={(answers.legalFirstName as string) || ""}
+              onChange={(v) => setAnswer("legalFirstName", v)} required />
+            <InputField label="Legal last name" id="legalLastName" placeholder="As it appears on your ID"
+              value={(answers.legalLastName as string) || ""}
+              onChange={(v) => setAnswer("legalLastName", v)} required />
+            <InputField label="Preferred first name (optional)" id="preferredFirstName" placeholder=""
+              value={(answers.preferredFirstName as string) || ""}
+              onChange={(v) => setAnswer("preferredFirstName", v)}
+              hint="What should your care team call you?" />
             <InputField label="Email" id="profileEmail" type="email" placeholder="you@example.com"
               value={(answers.profileEmail as string) || ""}
               onChange={(v) => setAnswer("profileEmail", v)} required />
@@ -1257,7 +1261,8 @@ function buildSteps(): StepConfig[] {
         );
       },
       canContinue: (answers) => !!(
-        (answers.legalName as string)?.trim() &&
+        (answers.legalFirstName as string)?.trim() &&
+        (answers.legalLastName as string)?.trim() &&
         (answers.profileEmail as string)?.trim() &&
         (answers.profilePhone as string)?.trim()
       ),
@@ -1383,8 +1388,9 @@ function buildSteps(): StepConfig[] {
         };
 
         const rows: { label: string; value: string }[] = [
-          { label: "Legal name", value: (answers.legalName as string) || "—" },
-          { label: "Preferred name", value: (answers.preferredName as string) || "—" },
+          { label: "Legal first name", value: (answers.legalFirstName as string) || "—" },
+          { label: "Legal last name", value: (answers.legalLastName as string) || "—" },
+          { label: "Preferred first name", value: (answers.preferredFirstName as string) || "—" },
           { label: "Email", value: (answers.profileEmail as string) || "—" },
           { label: "Phone", value: (answers.profilePhone as string) || "—" },
           { label: "Gender identity", value: answers.genderIdentity ? (genderLabels[answers.genderIdentity as string] || "—") : "—" },
@@ -1444,13 +1450,14 @@ function buildSteps(): StepConfig[] {
         body: "The confirmation screen is the last memory users have of the intake experience. A clear intake ID, explicit status, realistic timeline, and concrete next steps leave users feeling confident — not wondering 'did that work?'",
         insight: "Health app NPS scores are disproportionately driven by the post-submit moment. A polished confirmation screen with a unique ID and timeline has the same trust impact as a full rebrand.",
       },
-      render: () => {
+      render: (answers) => {
         const intakeId = `WW-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+        const displayName = (answers.preferredFirstName as string)?.trim() || (answers.legalFirstName as string)?.trim() || "";
         return (
           <div className="flex flex-col gap-6">
             <div className="flex flex-col items-center gap-3 rounded-2xl border border-teal-800 bg-teal-950/40 px-6 py-8 text-center">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-teal-900/60 text-3xl">✅</div>
-              <h3 className="text-xl font-semibold text-teal-100">You're all set</h3>
+              <h3 className="text-xl font-semibold text-teal-100">{displayName ? `You're all set, ${displayName}` : "You're all set"}</h3>
               <p className="text-sm text-teal-300/80">Your intake has been submitted and is pending clinical review.</p>
               <div className="rounded-lg border border-teal-700/60 bg-teal-900/40 px-4 py-2">
                 <p className="text-xs font-medium text-teal-500 uppercase tracking-widest">Intake ID</p>
