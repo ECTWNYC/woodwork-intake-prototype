@@ -1161,7 +1161,7 @@ function buildSteps(): StepConfig[] {
           { value: "trans_man", label: "Transgender man" },
           { value: "trans_woman", label: "Transgender woman" },
           { value: "genderqueer", label: "Genderqueer / gender fluid" },
-          { value: "not_listed", label: "An identity not listed here" },
+          { value: "another_identity", label: "Another identity" },
           { value: "prefer_not", label: "Prefer not to say" },
         ];
         return (
@@ -1187,6 +1187,21 @@ function buildSteps(): StepConfig[] {
                     onClick={() => setAnswer("genderIdentity", o.value)} />
                 ))}
               </div>
+              {answers.genderIdentity === "another_identity" && (
+                <div className="flex flex-col gap-1.5 mt-1">
+                  <label htmlFor="genderIdentityOther" className="text-sm font-medium text-zinc-300">
+                    Tell us how you describe your gender, if you&apos;d like. <span className="text-xs font-normal text-zinc-500">(optional)</span>
+                  </label>
+                  <input
+                    id="genderIdentityOther"
+                    type="text"
+                    value={(answers.genderIdentityOther as string) || ""}
+                    onChange={(e) => setAnswer("genderIdentityOther", e.target.value)}
+                    placeholder="Describe your gender identity"
+                    className="rounded-lg border border-zinc-700 bg-zinc-900 px-3.5 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 transition-colors focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                  />
+                </div>
+              )}
             </div>
           </div>
         );
@@ -1303,7 +1318,7 @@ function buildSteps(): StepConfig[] {
         const genderLabels: Record<string, string> = {
           man: "Man", woman: "Woman", nonbinary: "Non-binary",
           trans_man: "Transgender man", trans_woman: "Transgender woman",
-          genderqueer: "Genderqueer / gender fluid", not_listed: "An identity not listed here",
+          genderqueer: "Genderqueer / gender fluid", another_identity: "Another identity",
           prefer_not: "Prefer not to say",
         };
 
